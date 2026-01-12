@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'nodejs'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                url: 'https://github.com/thiruselvam123/REPO.git'
+            }
+        }
+
+        stage('Install') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Deploy') {
+            environment {
+                NETLIFY_AUTH_TOKEN = credentials('nfp_2cDBxCKVaGeawCFuEAAhY4VEAZroPPEx9004')
+                NETLIFY_SITE_ID = '1cc40ff9-fda0-4bbe-bbea-3e3b60c60a61'
+            }
+            steps {
+                sh '''
+                npx netlify deploy --prod \
+                --dir=build \
+                --site=$NETLIFY_SITE_ID \
+                --auth=$NETLIFY_AUTH_TOKEN
+                '''
+            }
+        }
+    }
+}
